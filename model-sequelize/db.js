@@ -1,9 +1,10 @@
 const Sequelize = require('sequelize');
+const config = require('./config');
 
 console.log('init sequelize...');
 
-var sequelize = new Sequelize('test', 'root', '123456', {
-    host: 'localhost',
+var sequelize = new Sequelize(config.database, config.username, config.password, {
+    host: config.host,
     dialect: 'mysql',
     pool: {
         max: 5,
@@ -63,5 +64,15 @@ function defineModel(name, attributes) {
         }
     })
 }
+var exp = {
+    defineModel: defineModel,
+    sync: () => {sequelize.sync({force: true, logging: false});}
+}
 
-module.exports = defineModel;
+const TYPES = ['STRING', 'INTEGER', 'BIGINT', 'TEXT', 'DOUBLE', 'DATEONLY', 'BOOLEAN'];
+
+for (let type of TYPES) {
+    exp[type] = Sequelize[type];
+}
+
+module.exports = exp;
